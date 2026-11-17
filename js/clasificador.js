@@ -109,10 +109,29 @@ function crearSesion(candidato, alAvanzar) {
 }
 
 /** Calcula el vector de la imagen de prueba y lo compara con el que debería dar. */
-async function autoverificar() {
+async function autoverificar(candidato) {
   const vector = await enTurno(() => calcularVector(imagenDePrueba()));
   if (!vectores.prueba) return true; // archivo de vectores antiguo: no hay con qué comparar
-  return parecido(vector, vectores.prueba) >= CONFIG.parecidoMinimoPrueba;
+  const minimo = candidato.minimo ?? CONFIG.parecidoMinimoPrueba;
+  return parecido(vector, vectores.prueba) >= minimo;
+}
+
+/** Libera el modelo actual (por ejemplo, para cambiar al modo ligero sin recargar la página). */
+export async function descartarModelo() {
+  const viejo = modelo;
+  modelo = null;
+  motor = null;
+  cargaModelo = null;
+  try {
+    await turno; // espera a que termine el análisis que estuviera en curso
+  } catch (ignorado) {
+    /* nada */
+  }
+  try {
+    if (viejo && viejo.dispose) await viejo.dispose();
+  } catch (ignorado) {
+    /* nada */
+  }
 }
 
 /**
@@ -122,6 +141,7 @@ async function autoverificar() {
  * mucho más rápida; si el dispositivo no la tiene, falla o calcula mal, usa el procesador (WASM).
  *   alAvanzar({ fraccion, cargado, total, etapa }) → se llama mientras descarga
  *   opciones.gpu = false                           → salta la tarjeta gráfica
+ *   opciones.ligero = true                         → usa solo el modelo comprimido (CONFIG.motorLigero)
  */
 export function prepararModelo(alAvanzar = () => {}, opciones = {}) {
   if (!cargaModelo) {
@@ -133,7 +153,9 @@ export function prepararModelo(alAvanzar = () => {}, opciones = {}) {
       procesador = await libreria.AutoProcessor.from_pretrained(CONFIG.modelo);
 
       const conGPU = opciones.gpu !== false && 'gpu' in navigator;
-      const candidatos = CONFIG.motores.filter((m) => m.dispositivo !== 'webgpu' || conGPU);
+      const candidatos = opciones.ligero
+        ? [CONFIG.motorLigero]
+        : CONFIG.motores.filter((m) => m.dispositivo !== 'webgpu' || conGPU);
       let ultimoError = null;
       for (const candidato of candidatos) {
         try {
@@ -143,7 +165,7 @@ export function prepararModelo(alAvanzar = () => {}, opciones = {}) {
           modelo = await crearSesion(candidato, alAvanzar);
           alAvanzar({ fraccion: 0.96, etapa: 'calentando' });
           // La primera pasada también deja todo compilado para que el primer escaneo real sea rápido.
-          const correcto = await conLimite(autoverificar(), candidato.dispositivo === 'webgpu' ? 60000 : 180000);
+          const correcto = await conLimite(autoverificar(candidato), candidato.dispositivo === 'webgpu' ? 60000 : 180000);
           if (!correcto) throw new Error('la autoverificación no coincidió');
           motor = candidato;
           break;

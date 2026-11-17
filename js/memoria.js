@@ -32,7 +32,17 @@ function escribir(clave, valor) {
 //   iaDescargada  → la IA ya se descargó alguna vez (se carga sola al abrir)
 //   gpu           → la persona permite usar la tarjeta gráfica
 //   gpuFalla      → la tarjeta gráfica falló en este dispositivo: no se vuelve a intentar
-const ajustes = { voz: true, iaDescargada: false, gpu: true, gpuFalla: false, ...leer('ajustes', {}) };
+//   ligero        → modelo comprimido (null = decide la app: encendido en iPhone/iPad)
+//   ultimoError   → último problema registrado { t, texto }, se ve en Progreso → Acerca de
+const ajustes = {
+  voz: true,
+  iaDescargada: false,
+  gpu: true,
+  gpuFalla: false,
+  ligero: null,
+  ultimoError: null,
+  ...leer('ajustes', {}),
+};
 
 export function ajuste(nombre) {
   return ajustes[nombre];

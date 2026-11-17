@@ -18,6 +18,11 @@ export const CONFIG = {
     { dispositivo: 'webgpu', precision: 'fp16' },
     { dispositivo: 'wasm', precision: 'fp32' },
   ],
+  // Modo ligero: versión de media precisión del modelo (22 MB) en el procesador, sin tarjeta gráfica.
+  // Es el modo por defecto en iPhone y iPad, donde Safari cierra las páginas que fallan o gastan mucho.
+  // Medido el 17-nov-2026: da el mismo resultado que la versión completa (parecido 1,00).
+  // OJO: las versiones de 8 bits (q8, uint8, int8) de este modelo están dañadas (parecido 0,2–0,4).
+  motorLigero: { dispositivo: 'wasm', precision: 'fp16' },
   // Qué tanto debe parecerse el resultado de la imagen de prueba al valor de referencia (1 = idéntico).
   parecidoMinimoPrueba: 0.98,
   // Lado (en píxeles) de la imagen cuadrada que recibe el modelo.

@@ -12,7 +12,7 @@ import { CANECAS, ORDEN_CANECAS, RESIDUOS, residuoPorId, buscarResiduos } from '
 import * as IA from './clasificador.js';
 import * as Memoria from './memoria.js';
 import { Camara, MENSAJES_CAMARA } from './camara.js';
-import { hablar, callar, vozDisponible } from './voz.js';
+import { hablar, callar, vozDisponible, desbloquearVoz } from './voz.js';
 import { ICONOS, dibujoCaneca, logo } from './graficos.js';
 
 // ───────────────────────── Utilidades ─────────────────────────
@@ -102,6 +102,7 @@ function iniciarIA() {
   ultimoPorcentaje = -1;
   pintarEstadoIA();
   const quiereGPU = gpuPermitida();
+  const ligero = modoLigero();
   promesaIA = IA.prepararModelo(
     (avance) => {
       Object.assign(ia, avance);
@@ -111,17 +112,18 @@ function iniciarIA() {
         pintarEstadoIA();
       }
     },
-    { gpu: quiereGPU },
+    { gpu: quiereGPU, ligero },
   ).then(
     (motor) => {
       ia.estado = 'lista';
       Memoria.cambiarAjuste('iaDescargada', true);
       // Si la tarjeta gráfica no funcionó aquí, no se vuelve a intentar (evita descargar dos modelos).
-      if (quiereGPU && 'gpu' in navigator && motor.dispositivo !== 'webgpu') Memoria.cambiarAjuste('gpuFalla', true);
+      if (!ligero && quiereGPU && 'gpu' in navigator && motor.dispositivo !== 'webgpu') Memoria.cambiarAjuste('gpuFalla', true);
       pintarEstadoIA();
     },
     (error) => {
       console.error('No se pudo cargar la IA', error);
+      registrarError('cargar la IA', error);
       ia.estado = 'error';
       pintarEstadoIA();
       throw error;
@@ -133,6 +135,81 @@ function iniciarIA() {
 /** ¿Se puede intentar usar la tarjeta gráfica? (la persona lo permite y no ha fallado antes) */
 function gpuPermitida() {
   return Memoria.ajuste('gpu') !== false && !Memoria.ajuste('gpuFalla');
+}
+
+// iPhone y iPad (los iPad nuevos se presentan como Mac con pantalla táctil).
+const ES_IOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+/** Modo ligero: modelo comprimido que gasta poca memoria. Por defecto encendido en iPhone/iPad. */
+function modoLigero() {
+  const valor = Memoria.ajuste('ligero');
+  return valor === null || valor === undefined ? ES_IOS : Boolean(valor);
+}
+
+/** Guarda el último problema para poder verlo en Progreso → Acerca de. */
+function registrarError(donde, error) {
+  const texto = (error && error.message) || String(error || 'desconocido');
+  Memoria.cambiarAjuste('ultimoError', { t: Date.now(), texto: `${donde}: ${texto}`.slice(0, 200) });
+}
+
+/** Libera la IA y la vuelve a cargar con los ajustes actuales, sin recargar la página. */
+async function reiniciarIA() {
+  await IA.descartarModelo();
+  ia.estado = 'pendiente';
+  promesaIA = null;
+  sesion.ultimo = null;
+  sesion.suave = null;
+  sesion.clave = '';
+  try {
+    await iniciarIA();
+  } catch (error) {
+    /* el mensaje de error ya se muestra en pantalla */
+  }
+}
+
+// ---- Cierres inesperados ----
+// Safari en iPhone recarga la página sin avisar cuando se queda sin memoria. Mientras la cámara está
+// abierta se deja una marca con la hora; si al arrancar la marca sigue ahí, la app se cerró sola.
+const CLAVE_CAMARA = 'ecocaneca.camaraAbierta';
+let ultimaMarca = 0;
+
+function marcarCamara() {
+  const ahora = Date.now();
+  if (ahora - ultimaMarca < 2000) return;
+  ultimaMarca = ahora;
+  try {
+    localStorage.setItem(CLAVE_CAMARA, String(ahora));
+  } catch (error) {
+    /* sin almacenamiento */
+  }
+}
+
+function desmarcarCamara() {
+  ultimaMarca = 0;
+  try {
+    localStorage.removeItem(CLAVE_CAMARA);
+  } catch (error) {
+    /* sin almacenamiento */
+  }
+}
+
+function revisarCierreInesperado() {
+  let marca = 0;
+  try {
+    marca = Number(localStorage.getItem(CLAVE_CAMARA)) || 0;
+    localStorage.removeItem(CLAVE_CAMARA);
+  } catch (error) {
+    return;
+  }
+  if (!marca || Date.now() - marca > 120000) return;
+  registrarError('cierre inesperado', 'el navegador reinició la app con la cámara abierta');
+  if (!modoLigero()) {
+    Memoria.cambiarAjuste('ligero', true);
+    avisar('La app se reinició sola mientras usabas la cámara. Activé el modo ligero, que gasta menos memoria.', 8000);
+  } else {
+    avisar('La app se reinició sola con la cámara abierta. Si vuelve a pasar, usa «Subir una foto».', 8000);
+  }
 }
 
 function textoDescarga() {
@@ -149,16 +226,19 @@ function pintarEstadoIA() {
     if (ia.estado === 'pendiente') {
       caja.innerHTML =
         '<div class="ia-icono">⬇️</div><div class="ia-texto"><strong>La IA se descarga una sola vez</strong>' +
-        '<span>Entre 30 y 50 MB. Después funciona sin internet.</span></div>' +
+        `<span>${modoLigero() ? 'Unos 22 MB' : 'Entre 22 y 45 MB'}. Después funciona sin internet.</span></div>` +
         '<button type="button" class="boton fantasma" data-accion="descargar-ia">Descargar</button>';
     } else if (ia.estado === 'cargando') {
       caja.innerHTML =
         `<div class="ia-icono">⏳</div><div class="ia-texto"><strong>Preparando la IA… ${porciento(ia.fraccion)}</strong>` +
         `<span>${textoDescarga()}</span><div class="barra-progreso"><i style="width:${ia.fraccion * 100}%"></i></div></div>`;
     } else if (ia.estado === 'lista') {
-      const rapida = IA.motorActual() && IA.motorActual().dispositivo === 'webgpu';
+      const motor = IA.motorActual();
+      let modo = '';
+      if (motor && motor.dispositivo === 'webgpu') modo = ' · modo rápido';
+      else if (motor && motor.dispositivo === 'wasm' && modoLigero()) modo = ' · modo ligero';
       caja.innerHTML =
-        `<div class="ia-icono">✅</div><div class="ia-texto"><strong>IA lista${rapida ? ' · modo rápido' : ''}</strong>` +
+        `<div class="ia-icono">✅</div><div class="ia-texto"><strong>IA lista${modo}</strong>` +
         '<span>Funciona en este dispositivo, también sin internet.</span></div>';
     } else {
       caja.innerHTML =
@@ -253,6 +333,7 @@ function mostrarVisor(modo) {
 
 function cerrarVisor() {
   if (camara) camara.cerrar();
+  desmarcarCamara();
   callar();
   mostrarVisor('inicio');
 }
@@ -272,6 +353,7 @@ async function abrirCamara() {
     camara.cerrar(); // la persona se fue a otra pantalla mientras se abría
     return;
   }
+  marcarCamara();
   actualizarBotonesCamara();
   cicloEnVivo();
 }
@@ -290,6 +372,7 @@ async function cicloEnVivo() {
   const video = $('#video');
   let fallosSeguidos = 0;
   while (sesion.modo === 'camara' && camara.activa) {
+    marcarCamara();
     if (!sesion.pausada && !document.hidden && IA.modeloListo() && video.readyState >= 2 && video.videoWidth) {
       try {
         IA.recortarAlCentro(video, sesion.lienzo);
@@ -301,26 +384,38 @@ async function cicloEnVivo() {
         fallosSeguidos++;
         if (fallosSeguidos >= 3) {
           sesion.corriendo = false;
-          recuperarIA();
+          recuperarIA(error);
           return;
         }
       }
     }
-    await espera(CONFIG.pausaEntreAnalisis);
+    // En modo ligero se analiza un poco menos seguido para no calentar ni agotar el celular.
+    await espera(CONFIG.pausaEntreAnalisis * (modoLigero() ? 2 : 1));
   }
   sesion.corriendo = false;
 }
 
-/** Si la IA falla varias veces seguidas, se reinicia en el modo más compatible. */
-function recuperarIA() {
-  const motor = IA.motorActual();
-  if (motor && motor.dispositivo === 'webgpu') {
-    Memoria.cambiarAjuste('gpuFalla', true);
-    avisar('Reiniciando la IA en modo compatible…', 2500);
-    setTimeout(() => location.reload(), 1500);
-  } else {
-    cerrarVisor();
-    avisar('La IA tuvo un problema. Vuelve a abrir la cámara.', 4500);
+/**
+ * Si la IA falla varias veces seguidas, pasa al modo ligero SIN recargar la página y SIN cerrar
+ * la cámara. Si ya estaba en modo ligero, muestra el problema en pantalla.
+ */
+async function recuperarIA(error) {
+  registrarError('analizar la cámara', error);
+  if (!modoLigero()) {
+    Memoria.cambiarAjuste('ligero', true);
+    avisar('La IA tuvo un problema. Cambio al modo ligero…', 4000);
+    await reiniciarIA();
+    if (sesion.modo === 'camara' && camara.activa) cicloEnVivo();
+    return;
+  }
+  sesion.ultimo = null;
+  sesion.clave = 'error';
+  const caja = $('#resultado');
+  if (caja) {
+    const texto = (error && error.message) || 'error desconocido';
+    caja.innerHTML =
+      '<div class="res-neutro"><div class="res-icono">⚠️</div><div><strong>La IA no pudo analizar la cámara</strong>' +
+      `<span>${limpio(texto.slice(0, 120))}. Prueba con «Subir foto».</span></div></div>`;
   }
 }
 
@@ -401,15 +496,18 @@ async function analizarFoto(archivo) {
     $('#visor-foto').src = sesion.lienzo.toDataURL('image/jpeg', 0.92);
     pintarResultado(null, 'foto');
     await iniciarIA();
+    marcarCamara();
     const vector = await IA.vectorDeImagen(sesion.lienzo);
     if (sesion.modo === 'foto') resolverFoto(vector, true);
   } catch (error) {
     console.error(error);
     if (ia.estado !== 'error') {
+      registrarError('analizar la foto', error);
       avisar('No pude leer esa imagen. Prueba con otra.');
       mostrarVisor('inicio');
     }
   } finally {
+    desmarcarCamara();
     URL.revokeObjectURL(url);
   }
 }
@@ -866,7 +964,8 @@ function pintarProgreso() {
     (vozDisponible()
       ? `<div class="ajuste-fila"><div><strong>Voz</strong><span>Leer el resultado en voz alta</span></div><button type="button" class="interruptor" role="switch" aria-checked="${Boolean(Memoria.ajuste('voz'))}" aria-label="Voz" data-progreso="voz"></button></div>`
       : '') +
-    ('gpu' in navigator
+    `<div class="ajuste-fila"><div><strong>Modo ligero</strong><span>No usa la tarjeta gráfica y descarga la mitad (22 MB). Recomendado en iPhone y celulares sencillos.</span></div><button type="button" class="interruptor" role="switch" aria-checked="${modoLigero()}" aria-label="Modo ligero" data-progreso="ligero"></button></div>` +
+    ('gpu' in navigator && !modoLigero()
       ? `<div class="ajuste-fila"><div><strong>Modo rápido (GPU)</strong><span>${Memoria.ajuste('gpuFalla') ? 'No funcionó en este dispositivo. Actívalo para reintentar.' : 'Usa la tarjeta gráfica para escanear más rápido'}</span></div><button type="button" class="interruptor" role="switch" aria-checked="${gpuPermitida()}" aria-label="Modo rápido con la tarjeta gráfica" data-progreso="gpu"></button></div>`
       : '') +
     (instalador
@@ -879,13 +978,23 @@ function pintarProgreso() {
     '<p>Clasifica con el código de colores de la <strong>Resolución 2184 de 2019</strong> del Ministerio de Ambiente y Desarrollo Sostenible de Colombia.</p>' +
     '<p>La inteligencia artificial (modelo MobileCLIP-S0, ejecutado con Transformers.js) funciona dentro de tu navegador: las fotos <strong>no se envían</strong> a ningún servidor.</p>' +
     `<p>Motor de la IA en este dispositivo: <strong>${textoMotor()}</strong>.</p>` +
+    textoUltimoError() +
     '<p>La IA puede equivocarse. Si tienes dudas, consulta a tu empresa de aseo.</p></div>';
 }
 
 function textoMotor() {
   const motor = IA.motorActual();
   if (!motor) return ia.estado === 'cargando' ? 'cargando…' : 'todavía sin cargar';
-  return motor.dispositivo === 'webgpu' ? 'tarjeta gráfica (WebGPU)' : 'procesador (WebAssembly)';
+  if (motor.dispositivo === 'webgpu') return 'tarjeta gráfica (WebGPU)';
+  return motor.precision === 'fp16' ? 'procesador, modo ligero' : 'procesador (WebAssembly)';
+}
+
+/** Último problema registrado: sirve para saber qué pasó si algo falla en un celular. */
+function textoUltimoError() {
+  const error = Memoria.ajuste('ultimoError');
+  if (!error || !error.texto) return '';
+  const fecha = new Date(error.t).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  return `<p>Último problema (${fecha}): <code>${limpio(error.texto)}</code></p>`;
 }
 
 async function manejarProgreso(evento) {
@@ -894,6 +1003,10 @@ async function manejarProgreso(evento) {
   const accion = boton.dataset.progreso;
   if (accion === 'voz') {
     alternarVoz();
+  } else if (accion === 'ligero') {
+    Memoria.cambiarAjuste('ligero', !modoLigero());
+    avisar(modoLigero() ? 'Modo ligero activado. Cargando la IA…' : 'Modo ligero desactivado. Cargando la IA…', 2500);
+    reiniciarIA().then(() => vistaActual === 'progreso' && pintarProgreso());
   } else if (accion === 'gpu') {
     Memoria.cambiarAjuste('gpu', !gpuPermitida());
     Memoria.cambiarAjuste('gpuFalla', false);
@@ -1037,7 +1150,13 @@ function conectarEventos() {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && sesion.modo === 'camara') cerrarVisor();
   });
-  window.addEventListener('pagehide', () => camara && camara.cerrar());
+  window.addEventListener('pagehide', () => {
+    if (camara) camara.cerrar();
+    desmarcarCamara();
+  });
+  // Safari (iPhone) solo deja hablar si la voz se "estrena" durante un toque en la pantalla.
+  document.addEventListener('click', desbloquearVoz, true);
+  document.addEventListener('touchend', desbloquearVoz, true);
   window.addEventListener('hashchange', () => {
     const vista = location.hash.slice(1);
     if (VISTAS.includes(vista) && vista !== vistaActual) irA(vista);
@@ -1056,6 +1175,7 @@ function iniciar() {
   pintarEscanear();
   pintarCanecas();
   pintarBotonVoz();
+  revisarCierreInesperado();
   pintarEstadoIA();
   conectarEventos();
 
