@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EcoCaneca · ¿En qué caneca va?</title>
+  <meta name="description" content="Escanea un residuo con la cámara y descubre en qué caneca va según el código de colores de Colombia: blanca, negra o verde.">
+  <meta name="theme-color" content="#0b7a4b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="EcoCaneca">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./iconos/icono.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./iconos/icono-180.png">
+  <link rel="stylesheet" href="./css/estilos.css">
+</head>
+<body>
+  <div class="app">
+    <header class="cabecera">
+      <a class="marca" href="./" aria-label="EcoCaneca, inicio">
+        <span id="marca-logo" class="marca-logo"></span>
+        <span class="marca-nombre">Eco<b>Caneca</b></span>
+      </a>
+      <button id="btn-voz" class="boton-icono" type="button" aria-label="Activar o desactivar la voz" aria-pressed="true"></button>
+    </header>
+
+    <main id="contenido" class="contenido">
+      <section id="vista-escanear" class="vista activa" aria-label="Escanear"></section>
+      <section id="vista-buscar" class="vista" aria-label="Buscar un residuo" hidden></section>
+      <section id="vista-canecas" class="vista" aria-label="Guía de canecas" hidden></section>
+      <section id="vista-reto" class="vista" aria-label="Reto" hidden></section>
+      <section id="vista-progreso" class="vista" aria-label="Mi progreso" hidden></section>
+      <noscript>
+        <p class="tarjeta">EcoCaneca necesita JavaScript para funcionar. Actívalo en tu navegador.</p>
+      </noscript>
+    </main>
+
+    <nav class="pestanas" aria-label="Secciones">
+      <button type="button" class="pestana activa" data-vista="escanear" aria-current="page"><span class="pestana-icono" data-icono="escanear"></span><span>Escanear</span></button>
+      <button type="button" class="pestana" data-vista="buscar"><span class="pestana-icono" data-icono="buscar"></span><span>Buscar</span></button>
+      <button type="button" class="pestana" data-vista="canecas"><span class="pestana-icono" data-icono="canecas"></span><span>Canecas</span></button>
+      <button type="button" class="pestana" data-vista="reto"><span class="pestana-icono" data-icono="reto"></span><span>Reto</span></button>
+      <button type="button" class="pestana" data-vista="progreso"><span class="pestana-icono" data-icono="progreso"></span><span>Progreso</span></button>
+    </nav>
+  </div>
+
+  <!-- Hoja que sube desde abajo con el detalle de un residuo o la lista para corregir -->
+  <div id="telon" class="telon" hidden></div>
+  <div id="hoja" class="hoja" role="dialog" aria-modal="true" aria-label="Detalle" hidden></div>
+
+  <!-- Mensajes cortos que aparecen y desaparecen -->
+  <div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
