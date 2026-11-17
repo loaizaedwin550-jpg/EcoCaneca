@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoCaneca · Guía del proyecto</title>
+<style>
+  :root {
+    --marca: #0b7a4b; --marca-oscura: #075c38; --suave: #e2f3e9; --fondo: #f4f8f5; --tarjeta: #ffffff;
+    --tinta: #15221b; --tinta2: #55665d; --borde: #d9e4dc; --negra: #1f2326; --verde: #2e9e4f; --naranja: #e8590c;
+    --aviso: #fff4d6; --aviso-borde: #f0c94a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+  body { margin: 0; font: 17px/1.62 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--tinta); background: var(--fondo); }
+  a { color: var(--marca); }
+  code { font-family: ui-monospace, Consolas, "Cascadia Mono", monospace; font-size: 0.9em; background: #e6efe9; padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+  pre { background: #10231a; color: #d6f5e3; padding: 16px 18px; border-radius: 14px; overflow-x: auto; font: 14px/1.5 ui-monospace, Consolas, monospace; }
+  pre code { background: none; padding: 0; color: inherit; }
+  h1, h2, h3 { line-height: 1.2; letter-spacing: -0.01em; }
+  h2 { font-size: 1.65rem; margin: 0 0 6px; }
+  h3 { font-size: 1.15rem; margin: 26px 0 8px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+
+  .pagina { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1160px; margin: 0 auto; }
+  .indice { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto; padding: 26px 16px 26px 20px; border-right: 1px solid var(--borde); font-size: 0.93rem; }
+  .indice .logo { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 800; margin-bottom: 18px; }
+  .indice .logo b { color: var(--marca); }
+  .indice a { display: block; padding: 6px 10px; border-radius: 9px; color: var(--tinta); text-decoration: none; }
+  .indice a:hover { background: var(--suave); }
+  .indice small { display: block; margin: 16px 10px 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.7rem; color: var(--tinta2); }
+  main { padding: 30px 42px 90px; min-width: 0; }
+  section { margin-bottom: 54px; }
+  .num { display: inline-block; font-size: 0.8rem; font-weight: 800; color: var(--marca); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .entrada { color: var(--tinta2); font-size: 1.06rem; margin-bottom: 18px; }
+
+  .portada { background: linear-gradient(140deg, #0b7a4b, #0a5f3c 70%); color: #fff; border-radius: 26px; padding: 34px 34px 30px; margin-bottom: 40px; }
+  .portada .ante { font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.8rem; opacity: 0.85; }
+  .portada h1 { font-size: 3rem; margin: 6px 0 10px; letter-spacing: -0.03em; }
+  .portada p { font-size: 1.2rem; max-width: 620px; margin-bottom: 20px; }
+  .fichas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ficha { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 99px; background: rgba(255, 255, 255, 0.14); font-weight: 700; font-size: 0.93rem; }
+  .ficha i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); }
+
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 18px; padding: 18px 20px; margin-bottom: 14px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .rejilla .tarjeta { margin: 0; }
+  .tarjeta h3 { margin-top: 0; }
+  .paso { display: flex; gap: 14px; align-items: flex-start; }
+  .paso > b { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--marca); color: #fff; }
+  .nota, .ojo { border-radius: 14px; padding: 14px 16px; margin: 14px 0; }
+  .nota { background: var(--suave); border-left: 5px solid var(--marca); }
+  .ojo { background: var(--aviso); border-left: 5px solid var(--aviso-borde); }
+  .nota p:last-child, .ojo p:last-child, .tarjeta p:last-child { margin-bottom: 0; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 14px; overflow: hidden; margin: 12px 0 16px; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { background: #eaf2ec; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  tr:last-child td { border-bottom: 0; }
+  .tabla-ancha { overflow-x: auto; }
+  .color { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; white-space: nowrap; }
+  .color i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #9fb0a6; }
+  .elegida td { background: #f0f9f3; }
+
+  .diagrama { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 18px; padding: 14px; margin: 14px 0; }
+  .diagrama svg { display: block; width: 100%; height: auto; }
+  .copiar { background: var(--tarjeta); border: 1px dashed #a9bdb1; border-radius: 16px; padding: 18px 22px; margin: 12px 0 18px; }
+  .copiar h4 { margin: 0 0 6px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--marca); }
+  .copiar p:last-child, .copiar ol:last-child, .copiar ul:last-child { margin-bottom: 0; }
+  .hueco { background: #ffe9a8; padding: 0 5px; border-radius: 5px; font-weight: 600; }
+  .fuentes li { margin-bottom: 10px; overflow-wrap: anywhere; }
+  .pie { color: var(--tinta2); font-size: 0.9rem; border-top: 1px solid var(--borde); padding-top: 18px; }
+
+  @media (max-width: 900px) {
+    .pagina { display: block; }
+    .indice { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--borde); padding: 16px; }
+    .indice nav { display: flex; flex-wrap: wrap; gap: 2px 4px; }
+    .indice small { display: none; }
+    main { padding: 20px 16px 60px; }
+    .portada { padding: 26px 22px; }
+    .portada h1 { font-size: 2.3rem; }
+  }
+  @media print {
+    body { background: #fff; font-size: 11.5pt; }
+    .pagina { display: block; }
+    .indice { display: none; }
+    main { padding: 0; }
+    .portada { background: #0b7a4b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    section { break-inside: avoid-page; }
+    a { color: inherit; }
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+<aside class="indice">
+  <div class="logo">
+    <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0b7a4b"/><g fill="none" stroke="#b7f0c8" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21v-5a5 5 0 0 1 5-5h5M43 11h5a5 5 0 0 1 5 5v5M53 43v5a5 5 0 0 1-5 5h-5M21 53h-5a5 5 0 0 1-5-5v-5"/></g><rect x="21" y="20.5" width="22" height="5.5" rx="2.75" fill="#fff"/><rect x="28.5" y="17" width="7" height="5" rx="2" fill="#fff"/><path d="M23.5 28h17l-1.6 14.6a3 3 0 0 1-3 2.7h-7.8a3 3 0 0 1-3-2.7z" fill="#fff"/></svg>
+    <span>Eco<b>Caneca</b></span>
+  </div>
+  <nav>
+    <small>Para empezar</small>
+    <a href="#empezar">1. Ábrela en 3 pasos</a>
+    <a href="#carpeta">2. Qué hay en la carpeta</a>
+    <a href="#donde">3. Dónde y con qué se hizo</a>
+    <small>Entenderla</small>
+    <a href="#funciona">4. Cómo funciona</a>
+    <a href="#norma">5. Código de colores y normas</a>
+    <a href="#pruebas">6. Qué tan bien acierta</a>
+    <small>Usarla</small>
+    <a href="#celular">7. Ponerla en el celular</a>
+    <a href="#cambiar">8. Cómo modificarla</a>
+    <a href="#presentar">9. Cómo presentarla</a>
+    <small>Para el trabajo</small>
+    <a href="#escrito">10. Texto para el documento</a>
+    <a href="#limites">11. Límites y siguientes pasos</a>
+    <a href="#fuentes">12. Fuentes</a>
+  </nav>
+</aside>
+
+<main>
+
+<header class="portada">
+  <div class="ante">Proyecto de Ambiental · Guía completa</div>
+  <h1>EcoCaneca</h1>
+  <p>Un software que <strong>escanea un residuo con la cámara</strong> y le dice a la persona <strong>en qué caneca va</strong>, según el código de colores de Colombia.</p>
+  <div class="fichas">
+    <span class="ficha"><i style="background:#fff"></i>Blanca · aprovechables</span>
+    <span class="ficha"><i style="background:#1f2326"></i>Negra · no aprovechables</span>
+    <span class="ficha"><i style="background:#2e9e4f"></i>Verde · orgánicos</span>
+    <span class="ficha"><i style="background:#e8590c"></i>Punto de recolección · peligrosos</span>
+  </div>
+</header>
+
+<section id="resumen">
+  <div class="rejilla">
+    <div class="tarjeta"><h3>✅ Qué está hecho</h3><p>La aplicación completa (versión 1.0): escaneo en vivo, foto, voz, buscador de 66 residuos, guía, juego, progreso y aprendizaje. Ya funciona en este computador.</p></div>
+    <div class="tarjeta"><h3>🌐 Ya está publicada</h3><p>Ábrela desde cualquier celular en <a href="https://loaizaedwin550-jpg.github.io/EcoCaneca/" target="_blank" rel="noopener"><strong>loaizaedwin550-jpg.github.io/EcoCaneca</strong></a>. Falta probarla con residuos reales en un celular.</p></div>
+    <div class="tarjeta"><h3>🧠 La idea en una línea</h3><p>Una IA que entiende imágenes compara lo que ve la cámara con descripciones de residuos y responde con el color de la caneca.</p></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 1 ───────────────────────── -->
+<section id="empezar">
+  <span class="num">Sección 1</span>
+  <h2>Ábrela en 3 pasos</h2>
+  <p class="entrada">Así se prueba en este computador, sin instalar nada más.</p>
+  <div class="tarjeta paso"><b>1</b><div><strong>Doble clic en <code>Abrir EcoCaneca.bat</code></strong> (está en esta misma carpeta). Se abre una ventana negra que dice «EcoCaneca está funcionando»: déjala abierta mientras usas la app.</div></div>
+  <div class="tarjeta paso"><b>2</b><div><strong>Se abre el navegador</strong> en <code>http://localhost:8765/app/</code>. Toca <strong>Abrir cámara</strong> y dale permiso cuando el navegador lo pida.</div></div>
+  <div class="tarjeta paso"><b>3</b><div><strong>Muestra un residuo</strong> frente a la cámara, cerca, hasta que llene el cuadro. La app responde con la caneca, un consejo y lo dice en voz alta.</div></div>
+  <div class="nota">
+    <p><strong>La primera vez</strong> descarga la inteligencia artificial (entre 30 y 50&nbsp;MB, según el equipo). Después queda guardada y la app funciona incluso sin internet.</p>
+    <p><strong>¿Sin cámara?</strong> Usa <strong>Subir una foto</strong>, o arrastra una imagen a la ventana, o pégala con <code>Ctrl + V</code>.</p>
+  </div>
+  <div class="ojo">
+    <p><strong>¿Por qué no basta con abrir <code>index.html</code> con doble clic?</strong> Porque los navegadores solo prestan la cámara a páginas «seguras»: las que empiezan por <code>https://</code> o las que se abren en <code>localhost</code>. El archivo <code>.bat</code> crea ese <code>localhost</code> usando Python, que ya está instalado en este equipo.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── 2 ───────────────────────── -->
+<section id="carpeta">
+  <span class="num">Sección 2</span>
+  <h2>Qué hay en la carpeta</h2>
+  <p class="entrada">Todo el proyecto vive en <code>Documentos\Proyecto de Ambiental</code>.</p>
+<pre><code>Proyecto de Ambiental/
+├── GUIA DEL PROYECTO.html     ← este documento
+├── Abrir EcoCaneca.bat        ← abre la app en el computador
+├── README.md                  ← resumen técnico (útil si lo subes a GitHub)
+│
+├── app/                       ← LA APLICACIÓN. Esto es lo que se publica en internet
+│   ├── index.html                 la página
+│   ├── css/estilos.css            colores, tamaños, apariencia
+│   ├── js/app.js                  pantallas y botones
+│   ├── js/clasificador.js         la inteligencia artificial
+│   ├── js/residuos.js             el catálogo: cada residuo y su caneca
+│   ├── js/config.js               ajustes (modelo, niveles de confianza)
+│   ├── js/camara.js, voz.js, memoria.js, graficos.js
+│   ├── datos/vectores-texto.json  el «diccionario» que usa la IA
+│   ├── manifest.webmanifest, sw.js    para instalarla y usarla sin internet
+│   └── iconos/
+│
+└── herramientas/              ← utilidades para desarrollar (no se publican)
+    ├── servidor.py                el servidor local que usa el .bat
+    ├── generar-vectores.html      se usa cuando cambias el catálogo
+    ├── generar-iconos.html
+    ├── evaluacion.html            mide qué tan bien acierta la IA
+    ├── casos-evaluacion.js        la lista de fotos de prueba
+    └── resultados-evaluacion.json el resultado de la última medición</code></pre>
+  <p>Todos los archivos de código tienen comentarios en español que explican qué hace cada parte.</p>
+</section>
+
+<!-- ───────────────────────── 3 ───────────────────────── -->
+<section id="donde">
+  <span class="num">Sección 3</span>
+  <h2>Dónde y con qué se construyó</h2>
+  <p class="entrada">La duda inicial era «tengo la idea, pero no sé dónde hacerla ni cómo construirla». Esta fue la decisión y el porqué.</p>
+
+  <div class="nota">
+    <p><strong>Decisión:</strong> una <strong>aplicación web</strong> (también llamada PWA) hecha con HTML, CSS y JavaScript, con la inteligencia artificial funcionando <strong>dentro del navegador del celular</strong>. Se abre con un enlace, como cualquier página, y se puede instalar en la pantalla de inicio.</p>
+  </div>
+
+  <h3>Por qué esta opción y no otra</h3>
+  <div class="tabla-ancha">
+  <table>
+    <tr><th>Opción</th><th>Lo bueno</th><th>Por qué se descartó o se eligió</th></tr>
+    <tr class="elegida"><td><strong>App web con IA en el navegador</strong> ✅</td><td>Sirve en Android, iPhone y computador con solo un enlace. Gratis. Sin tienda de apps ni servidor. Las fotos no salen del celular.</td><td><strong>Elegida.</strong> Es la forma más rápida de que cualquier persona la use, y no cuesta nada mantenerla.</td></tr>
+    <tr><td>App nativa de Android (Android Studio)</td><td>Acceso completo al teléfono.</td><td>Solo sirve en Android, hay que instalar un APK a mano o pagar la tienda, y toma mucho más tiempo.</td></tr>
+    <tr><td>Unity</td><td>Muy bueno para 3D y realidad aumentada.</td><td>Está pensado para juegos: la app queda pesada y aquí no se necesita 3D.</td></tr>
+    <tr><td>Teachable Machine (Google)</td><td>Entrenar un modelo propio sin programar.</td><td>Hay que tomar cientos de fotos por cada residuo y solo reconoce lo que se le entrenó.</td></tr>
+    <tr><td>IA en la nube (servicio de pago)</td><td>La mayor precisión posible.</td><td>Cobra por cada foto, necesita internet y un servidor, y las fotos salen del dispositivo.</td></tr>
+  </table>
+  </div>
+
+  <h3>Herramientas usadas (todas gratuitas)</h3>
+  <table>
+    <tr><th>Herramienta</th><th>Para qué</th></tr>
+    <tr><td><strong>Visual Studio Code</strong></td><td>Escribir y editar el código. Ya está instalado en este computador.</td></tr>
+    <tr><td><strong>HTML + CSS + JavaScript</strong></td><td>El lenguaje de la app. No usa frameworks ni hay que «compilar» nada: se edita un archivo, se recarga la página y listo.</td></tr>
+    <tr><td><strong>Transformers.js</strong> (Hugging Face)</td><td>La librería que ejecuta modelos de IA dentro del navegador.</td></tr>
+    <tr><td><strong>MobileCLIP-S0</strong> (Apple, 2024)</td><td>El modelo de IA: entiende imágenes y texto, y está diseñado para celulares.</td></tr>
+    <tr><td><strong>Python</strong></td><td>Solo para el servidor local de pruebas (el <code>.bat</code>). Ya está instalado.</td></tr>
+    <tr><td><strong>GitHub Pages</strong></td><td>Alojamiento gratuito para publicarla en internet (<a href="#celular">sección 7</a>).</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 4 ───────────────────────── -->
+<section id="funciona">
+  <span class="num">Sección 4</span>
+  <h2>Cómo funciona por dentro</h2>
+  <p class="entrada">Lo que pasa entre que la cámara ve un objeto y la app dice «caneca blanca».</p>
+
+  <div class="diagrama">
+    <svg viewBox="0 0 860 300" role="img" aria-label="Diagrama: cámara, recorte, modelo, comparación con frases, suma por caneca y respuesta">
+      <defs>
+        <marker id="punta" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0l9 4.5-9 4.5z" fill="#0b7a4b"/></marker>
+      </defs>
+      <g font-family="system-ui, Segoe UI, sans-serif" font-size="13" text-anchor="middle">
+        <g fill="#fff" stroke="#b9cbbf" stroke-width="1.5">
+          <rect x="10" y="40" width="120" height="96" rx="14"/>
+          <rect x="158" y="40" width="120" height="96" rx="14"/>
+          <rect x="306" y="40" width="130" height="96" rx="14" fill="#e2f3e9" stroke="#0b7a4b"/>
+          <rect x="464" y="40" width="130" height="96" rx="14"/>
+          <rect x="622" y="40" width="110" height="96" rx="14"/>
+          <rect x="760" y="40" width="90" height="96" rx="14" fill="#0b7a4b" stroke="#0b7a4b"/>
+          <rect x="464" y="196" width="130" height="78" rx="14" stroke-dasharray="6 5"/>
+          <rect x="306" y="196" width="130" height="78" rx="14" stroke-dasharray="6 5"/>
+        </g>
+        <g fill="none" stroke="#0b7a4b" stroke-width="2.2" marker-end="url(#punta)">
+          <path d="M130 88h24"/><path d="M278 88h24"/><path d="M436 88h24"/><path d="M594 88h24"/><path d="M732 88h24"/>
+          <path d="M529 196v-56"/><path d="M371 196c0-34 60-30 108-58"/>
+        </g>
+        <g fill="#15221b">
+          <text x="70" y="70" font-size="24">📷</text>
+          <text x="70" y="98" font-weight="700">1. Cámara</text>
+          <text x="70" y="116" fill="#55665d" font-size="11.5">o una foto</text>
+
+          <text x="218" y="70" font-size="24">✂️</text>
+          <text x="218" y="98" font-weight="700">2. Recorte</text>
+          <text x="218" y="116" fill="#55665d" font-size="11.5">cuadro de 256 px</text>
+
+          <text x="371" y="70" font-size="24">🧠</text>
+          <text x="371" y="98" font-weight="700">3. MobileCLIP</text>
+          <text x="371" y="116" fill="#55665d" font-size="11.5">vector de 512 números</text>
+
+          <text x="529" y="70" font-size="24">⚖️</text>
+          <text x="529" y="98" font-weight="700">4. Comparar</text>
+          <text x="529" y="116" fill="#55665d" font-size="11.5">con 259 frases</text>
+
+          <text x="677" y="70" font-size="24">➕</text>
+          <text x="677" y="98" font-weight="700">5. Sumar</text>
+          <text x="677" y="116" fill="#55665d" font-size="11.5">por residuo y caneca</text>
+
+          <text x="805" y="72" font-size="24">🗑️</text>
+          <text x="805" y="100" font-weight="700" fill="#fff">6. Caneca</text>
+          <text x="805" y="118" fill="#d6f5e3" font-size="11.5">+ voz</text>
+
+          <text x="529" y="226" font-weight="700">Frases del catálogo</text>
+          <text x="529" y="244" fill="#55665d" font-size="11.5">«a banana peel»…</text>
+          <text x="529" y="260" fill="#55665d" font-size="11.5">ya convertidas en vectores</text>
+
+          <text x="371" y="226" font-weight="700">Lo que le enseñaste</text>
+          <text x="371" y="244" fill="#55665d" font-size="11.5">ejemplos corregidos</text>
+          <text x="371" y="260" fill="#55665d" font-size="11.5">dan un refuerzo</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <h3>Paso a paso</h3>
+  <ol>
+    <li><strong>Captura.</strong> Varias veces por segundo la app toma lo que ve la cámara y recorta el cuadro central (lo mismo que se ve en pantalla).</li>
+    <li><strong>De imagen a números.</strong> El modelo MobileCLIP convierte ese cuadro en un <em>vector</em>: una lista de 512 números que resume «qué se ve».</li>
+    <li><strong>Comparación.</strong> El catálogo tiene 259 frases en inglés: 235 describen residuos («a banana peel», «an aluminum soda can», «a used paper napkin»…) y 24 describen escenas que <em>no</em> son residuos («a blank wall», «a person's face»…). Cada frase ya fue convertida en vector con el mismo modelo. La app mide qué tan parecido es el vector de la imagen a cada frase.</li>
+    <li><strong>Probabilidades.</strong> Las frases más parecidas reciben más probabilidad. Se suman las de cada residuo y luego las de cada caneca.</li>
+    <li><strong>Respuesta.</strong> Gana la caneca con más probabilidad. Según qué tan clara sea la ventaja, la app responde con seguridad, dice «probablemente», pregunta entre varias opciones o avisa que no ve ningún residuo.</li>
+  </ol>
+
+  <h3>Tres ideas clave para explicarlo</h3>
+  <div class="rejilla">
+    <div class="tarjeta"><h3>1. No se entrenó con fotos de basura</h3><p>MobileCLIP es un modelo de <strong>visión-lenguaje</strong>: aprendió a relacionar imágenes con textos. Por eso basta <em>describir</em> un residuo con una frase para que lo reconozca. A esto se le llama clasificación <strong>zero-shot</strong> («sin ejemplos»).</p></div>
+    <div class="tarjeta"><h3>2. Agregar un residuo es escribir una frase</h3><p>No hay que reentrenar nada. Se añade el residuo al catálogo con sus frases y se recalculan los vectores con una herramienta incluida.</p></div>
+    <div class="tarjeta"><h3>3. Todo ocurre en el dispositivo</h3><p>La foto nunca se envía a internet. La IA se descarga una vez y corre en el celular: es privada, gratuita y funciona sin conexión.</p></div>
+  </div>
+
+  <h3>Cuándo responde con seguridad y cuándo pregunta</h3>
+  <table>
+    <tr><th>Lo que calcula</th><th>Lo que hace la app</th></tr>
+    <tr><td>La mejor caneca tiene 60&nbsp;% o más</td><td>Responde con seguridad, lo dice en voz alta y lo suma al progreso.</td></tr>
+    <tr><td>Entre 40&nbsp;% y 60&nbsp;%</td><td>Dice «Probablemente va en…».</td></tr>
+    <tr><td>Menos de 40&nbsp;%</td><td>No adivina: muestra las tres opciones más probables para que la persona elija.</td></tr>
+    <tr><td>Lo más parecido es una escena sin residuos</td><td>Pide que apunten a un residuo.</td></tr>
+  </table>
+  <p>Estos valores están en <code>app/js/config.js</code> y se pueden cambiar.</p>
+
+  <h3>Cómo aprende de sus errores</h3>
+  <p>Cuando la app se equivoca, la persona toca <strong>«No es eso»</strong> y elige el residuo correcto. La app guarda el vector de esa imagen junto con la respuesta correcta. La próxima vez que vea algo parecido, ese ejemplo le da un <strong>refuerzo</strong> al residuo enseñado: entre más se parece la nueva imagen al ejemplo, más fuerte es el refuerzo. Es una versión simplificada de una técnica llamada <em>Tip-Adapter</em> (Zhang et al., 2022). Los ejemplos se guardan solo en ese dispositivo y se pueden borrar desde la pestaña <strong>Progreso</strong>.</p>
+
+  <h3>Modo rápido con la tarjeta gráfica</h3>
+  <p>Si el dispositivo lo permite, la IA usa la tarjeta gráfica (tecnología <em>WebGPU</em>) y descarga una versión del modelo de 23&nbsp;MB. Antes de usarla, la app hace una <strong>autoverificación</strong>: procesa una imagen de prueba y compara el resultado con un valor de referencia. Si no coincide, o el dispositivo no tiene WebGPU, usa el procesador (versión de 45&nbsp;MB), que es más lento pero funciona en cualquier equipo. En el computador donde se desarrolló, cada análisis tarda unos 0,05&nbsp;segundos con la tarjeta gráfica y entre 0,3 y 0,5 con el procesador.</p>
+</section>
+
+<!-- ───────────────────────── 5 ───────────────────────── -->
+<section id="norma">
+  <span class="num">Sección 5</span>
+  <h2>Código de colores y normas</h2>
+  <p class="entrada">La app no inventa la clasificación: aplica el código de colores oficial de Colombia.</p>
+
+  <div class="tabla-ancha">
+  <table>
+    <tr><th>Color</th><th>Qué va</th><th>Ejemplos oficiales</th></tr>
+    <tr><td><span class="color"><i style="background:#fff"></i>Blanco</span></td><td>Residuos aprovechables</td><td>Plástico, vidrio, metales, multicapa, papel y cartón. Limpios y secos.</td></tr>
+    <tr><td><span class="color"><i style="background:#1f2326"></i>Negro</span></td><td>Residuos no aprovechables</td><td>Papel higiénico; servilletas, papeles y cartones contaminados con comida; papeles metalizados; tapabocas y guantes.</td></tr>
+    <tr><td><span class="color"><i style="background:#2e9e4f"></i>Verde</span></td><td>Residuos orgánicos aprovechables</td><td>Restos de comida, residuos de corte de césped y poda de jardín, desechos agrícolas.</td></tr>
+  </table>
+  </div>
+
+  <h3>Las normas</h3>
+  <ul>
+    <li><strong>Resolución 2184 de 2019</strong> del Ministerio de Ambiente y Desarrollo Sostenible (26 de diciembre de 2019, Diario Oficial 51.179). Su <strong>artículo 4</strong> adopta el código de colores para todo el país y ordena a municipios y distritos implementarlo <strong>desde el 1 de enero de 2021</strong>, dentro de sus programas de aprovechamiento y sus planes de gestión integral de residuos sólidos (PGIRS).</li>
+    <li><strong>Resolución 1344 de 2020</strong> (24 de diciembre de 2020, Diario Oficial 51.541): le añadió un parágrafo a ese artículo 4 que dio plazo hasta el 1 de julio de 2022 a las actividades del sector salud y similares (artículo 2.8.10.2 del Decreto 780 de 2016).</li>
+  </ul>
+  <div class="ojo">
+    <p><strong>Dato para citar bien:</strong> los artículos 1 a 3 de la Resolución 2184 (que trataban sobre bolsas plásticas) fueron derogados por la Resolución 803 de 2024. El <strong>artículo 4, el del código de colores, no aparece derogado</strong> en el texto compilado que se consultó el 10 de noviembre de 2026 (<a href="https://normas.cra.gov.co/Gestor/Docs/resolucion_minambienteds_2184_2019.htm" target="_blank" rel="noopener">normas.cra.gov.co</a>). Antes de entregar el trabajo vale la pena abrir ese enlace y confirmar que sigue igual.</p>
+  </div>
+
+  <h3>Lo que no va en ninguna de las tres canecas</h3>
+  <p>Los residuos peligrosos y <em>posconsumo</em> se devuelven en puntos de recolección de los programas que deben organizar los fabricantes. El Ministerio de Ambiente los regula así:</p>
+  <div class="tabla-ancha">
+  <table>
+    <tr><th>Residuo</th><th>Norma</th><th>Programa conocido</th></tr>
+    <tr><td>Pilas y acumuladores</td><td>Resolución 1297 de 2010 (modificada por la 2246 de 2017)</td><td>Pilas con el Ambiente</td></tr>
+    <tr><td>Medicamentos vencidos</td><td>Resolución 0371 de 2009</td><td>Punto Azul</td></tr>
+    <tr><td>Bombillas</td><td>Resolución 1511 de 2010</td><td>Lúmina</td></tr>
+    <tr><td>Computadores y periféricos</td><td>Resolución 1512 de 2010</td><td>EcoCómputo</td></tr>
+    <tr><td>Neveras y electrodomésticos</td><td>—</td><td>Red Verde</td></tr>
+    <tr><td>Llantas usadas</td><td>Resolución 1326 de 2017</td><td>—</td></tr>
+    <tr><td>Baterías plomo-ácido</td><td>Resolución 0372 de 2009 (modificada por la 0361 de 2011)</td><td>—</td></tr>
+    <tr><td>Envases de plaguicidas</td><td>Resolución 1675 de 2013</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <h3>Decisiones del catálogo que conviene conocer</h3>
+  <p>La resolución da el criterio general, no una lista residuo por residuo. Para algunos casos la app toma una posición prudente y lo explica en el consejo:</p>
+  <ul>
+    <li><strong>Icopor:</strong> caneca negra, porque casi nunca se recicla y suele estar sucio de comida. El consejo aclara que, si en la ciudad lo reciben limpio, se entregue aparte.</li>
+    <li><strong>Vidrio roto, espejos y cerámica:</strong> caneca negra y envueltos, por seguridad de quien los recoge.</li>
+    <li><strong>Ropa y zapatos:</strong> primero donar; solo lo que ya no sirve va a la negra.</li>
+    <li><strong>Huesos:</strong> verde, por ser restos de comida, con la aclaración de que algunas rutas de orgánicos solo reciben vegetales.</li>
+  </ul>
+  <p>Cada municipio puede dar indicaciones más precisas en su PGIRS. Si la empresa de aseo de El Espinal dice algo distinto para algún residuo, basta cambiar la palabra <code>caneca</code> de ese residuo en <code>app/js/residuos.js</code>.</p>
+</section>
+
+<!-- ───────────────────────── 6 ───────────────────────── -->
+<section id="pruebas">
+  <span class="num">Sección 6</span>
+  <h2>Qué tan bien acierta</h2>
+  <p class="entrada">La IA se midió con fotografías reales, no con una impresión.</p>
+  <div class="rejilla">
+    <div class="tarjeta"><h3>90,7&nbsp;%</h3><p>de las fotos quedaron en la caneca correcta: <strong>136 de 150</strong>.</p></div>
+    <div class="tarjeta"><h3>93,3&nbsp;%</h3><p>de acierto cuando la app dice estar <strong>segura</strong> (125 de 134).</p></div>
+    <div class="tarjeta"><h3>150 fotos</h3><p>reales, revisadas a mano una por una. Cubren 40 de los 66 residuos del catálogo.</p></div>
+  </div>
+
+  <h3>Cómo se hizo la prueba</h3>
+  <ol>
+    <li><strong>Fotos.</strong> Se buscaron fotografías de uso libre en Wikimedia Commons con 63 búsquedas en inglés («banana peel», «cigarette butt», «AA batteries»…), tomando hasta 4 fotos por búsqueda. Tres búsquedas no trajeron nada; de las otras 60 salieron 228 imágenes.</li>
+    <li><strong>Limpieza.</strong> Se revisaron a mano y se descartaron 78 con tres reglas, aplicadas sin importar si la app había acertado o fallado: (a) el residuo no aparece o no es lo principal de la foto; (b) no es una fotografía normal (dibujo, diagrama, escultura, microscopio); (c) es casi idéntica a otra ya incluida. Quedaron <strong>150</strong>.</li>
+    <li><strong>Medición.</strong> Cada foto pasó por el mismo clasificador que usa la app y se comparó la caneca que respondió con la correcta.</li>
+  </ol>
+
+  <h3>Resultados</h3>
+  <table>
+    <tr><th>Grupo</th><th>Aciertos</th><th>Porcentaje</th></tr>
+    <tr class="elegida"><td><strong>Todas las fotos</strong></td><td><strong>136 de 150</strong></td><td><strong>90,7&nbsp;%</strong></td></tr>
+    <tr><td>Caneca blanca</td><td>36 de 42</td><td>85,7&nbsp;%</td></tr>
+    <tr><td>Caneca negra</td><td>32 de 36</td><td>88,9&nbsp;%</td></tr>
+    <tr><td>Caneca verde</td><td>20 de 22</td><td>90,9&nbsp;%</td></tr>
+    <tr><td>Punto de recolección</td><td>48 de 50</td><td>96,0&nbsp;%</td></tr>
+    <tr><td>Cuando la app dijo «seguro»</td><td>125 de 134</td><td>93,3&nbsp;%</td></tr>
+    <tr><td>Cuando dijo «probablemente»</td><td>11 de 15</td><td>73,3&nbsp;%</td></tr>
+  </table>
+  <p>La prueba se corrió dos veces: con el procesador (la que muestra la tabla) y con la tarjeta gráfica. En ambas acertó 136 de 150.</p>
+
+  <h3>Qué dicen estos números</h3>
+  <ul>
+    <li><strong>Acierta cerca de 9 de cada 10.</strong> Y cuando no está segura, lo dice: sus respuestas «seguras» fallan mucho menos que las «probables», que es justo para lo que sirve mostrar el nivel de confianza.</li>
+    <li><strong>En qué se equivocó.</strong> Los 14 errores fueron casi todos objetos que se parecen a otro: un frasco de champú tomado por un químico, una lata antigua tomada por una pila, una servilleta impresa tomada por papel, una caja de pizza limpia tomada por cartón reciclable, una lata de pintura vacía tomada por una lata de conserva.</li>
+    <li><strong>Sabe decir «no veo ningún residuo».</strong> Entre las 228 imágenes lo respondió 22 veces: 21 fueron justamente fotos descartadas porque el residuo no aparecía o no era lo principal (un muro, un grupo de personas, una tienda), y solo una fue un error (un cargador inalámbrico de carro).</li>
+  </ul>
+
+  <h3>El aprendizaje, medido</h3>
+  <p>Simulando que la persona ya le enseñó a la app las demás fotos, el acierto sube poco: de 136 a 137 de 150 (91,3&nbsp;%). Es lo esperado, porque las fotos de internet son muy distintas entre sí y el refuerzo está diseñado para actuar solo cuando la imagen se parece mucho al ejemplo. Donde sí se nota es con <strong>el mismo objeto</strong>: en la prueba con cámara, una botella plástica con un resto de gaseosa pasó de «probablemente blanca, 57&nbsp;%» a «blanca, 100&nbsp;%» después de corregirla una vez.</p>
+
+  <div class="ojo">
+    <p><strong>Para decirlo con honestidad en la sustentación:</strong></p>
+    <ul>
+      <li>Son fotos de internet, casi siempre bien iluminadas. Con la cámara de un celular, poca luz o fondos recargados el resultado puede ser menor.</li>
+      <li>Después de una primera medición se ajustaron las frases de seis residuos del catálogo y se repitió la prueba con las mismas búsquedas, así que el 90,7&nbsp;% es algo optimista.</li>
+      <li>Las fotos válidas cubren 40 de los 66 residuos del catálogo; los otros 26 no tienen medición todavía.</li>
+      <li>Falta la prueba que más importa: <strong>residuos reales con un celular real</strong>. Una forma sencilla de hacerla: reunir 30 residuos, escanear cada uno una vez y anotar aciertos y fallos en una tabla.</li>
+    </ul>
+  </div>
+
+  <h3>Velocidad</h3>
+  <p>En el computador donde se desarrolló, analizar una imagen tarda alrededor de 0,05&nbsp;segundos con la tarjeta gráfica y entre 0,3 y 0,5 con el procesador. En un celular será más lento; no se ha medido todavía.</p>
+
+  <h3>Cómo repetir la prueba</h3>
+  <p>Con la app abierta desde el <code>.bat</code>, entra a <code>http://localhost:8765/herramientas/evaluacion.html</code> y pulsa <strong>Iniciar evaluación</strong>. La lista de búsquedas y de fotos descartadas está en <code>herramientas/casos-evaluacion.js</code>, y el detalle foto por foto de la última medición en <code>herramientas/resultados-evaluacion.json</code>.</p>
+</section>
+
+<!-- ───────────────────────── 7 ───────────────────────── -->
+<section id="celular">
+  <span class="num">Sección 7</span>
+  <h2>Ponerla en el celular</h2>
+  <p class="entrada">Para que funcione en un celular hay que publicarla en una dirección <code>https://</code>. Con GitHub Pages es gratis y no vence.</p>
+
+  <div class="nota">
+    <p><strong>Ya está publicada en:</strong> <a href="https://loaizaedwin550-jpg.github.io/EcoCaneca/" target="_blank" rel="noopener">https://loaizaedwin550-jpg.github.io/EcoCaneca/</a></p>
+    <p>Se comprobó el 17 de noviembre de 2026: todos los archivos cargan, la IA se descarga y clasifica una foto de cáscara de banano como «caneca verde, 100&nbsp;%». Los pasos de abajo sirven para volver a publicarla o actualizarla.</p>
+  </div>
+
+  <h3>Cómo se publicó: GitHub Pages</h3>
+  <div class="tarjeta paso"><b>1</b><div>Crea una cuenta gratuita en <a href="https://github.com" target="_blank" rel="noopener">github.com</a> (si ya tienes, inicia sesión).</div></div>
+  <div class="tarjeta paso"><b>2</b><div>Arriba a la derecha: <strong>+ → New repository</strong>. Nombre: <code>ecocaneca</code>. Déjalo en <strong>Public</strong> y pulsa <strong>Create repository</strong>.</div></div>
+  <div class="tarjeta paso"><b>3</b><div>En la página que aparece, entra a <strong>uploading an existing file</strong>. Abre la carpeta <code>app</code> de este proyecto, selecciona <strong>todo lo que hay adentro</strong> (<code>index.html</code>, <code>sw.js</code>, <code>manifest.webmanifest</code> y las carpetas <code>css</code>, <code>js</code>, <code>datos</code>, <code>iconos</code>) y arrástralo a la página. Luego <strong>Commit changes</strong>.</div></div>
+  <div class="tarjeta paso"><b>4</b><div>Ve a <strong>Settings → Pages</strong>. En <strong>Branch</strong> elige <code>main</code> y la carpeta <code>/ (root)</code>, y pulsa <strong>Save</strong>.</div></div>
+  <div class="tarjeta paso"><b>5</b><div>Espera uno o dos minutos y recarga esa página: aparecerá la dirección, parecida a <code>https://TU-USUARIO.github.io/ecocaneca/</code>. Ese es el enlace de tu app.</div></div>
+  <div class="tarjeta paso"><b>6</b><div>Ábrelo en el celular con Chrome, toca <strong>Abrir cámara</strong> y permite el acceso. Para dejarla como app: menú <strong>⋮ → Agregar a pantalla principal</strong> (en iPhone: botón compartir → <em>Agregar a inicio</em>).</div></div>
+  <div class="ojo">
+    <p><strong>Importante:</strong> se suben los archivos que están <em>dentro</em> de <code>app</code>, no la carpeta <code>app</code> como tal. Así <code>index.html</code> queda en la raíz del repositorio y el enlace abre directo.</p>
+  </div>
+  <div class="nota">
+    <p><strong>Cuando cambies algo</strong> (por ejemplo, agregas un residuo), vuelve a subir los archivos modificados al repositorio con <strong>Add file → Upload files</strong>. En un par de minutos el enlace muestra la versión nueva.</p>
+  </div>
+
+  <h3>Opción para probar ya, sin publicar: cable USB (Android)</h3>
+  <ol>
+    <li>En el celular activa <strong>Opciones de desarrollador → Depuración USB</strong> y conéctalo al computador.</li>
+    <li>En el computador deja abierta la app con <code>Abrir EcoCaneca.bat</code>.</li>
+    <li>En Chrome del computador entra a <code>chrome://inspect/#devices</code>, pulsa <strong>Port forwarding</strong> y agrega el puerto <code>8765</code> con destino <code>localhost:8765</code>.</li>
+    <li>En Chrome del celular abre <code>http://localhost:8765/app/</code>.</li>
+  </ol>
+
+  <h3>iPhone y Safari</h3>
+  <p>En la primera prueba con un iPhone (17 de noviembre de 2026) la cámara se cerraba sola a los 5 o 6 segundos y no sonaba la voz. Se corrigió así:</p>
+  <ul>
+    <li><strong>Modo ligero por defecto en iPhone y iPad.</strong> No usa la tarjeta gráfica y descarga la mitad (22&nbsp;MB). Da el mismo resultado que el modelo completo: acertó 135 de 150 fotos (90,0&nbsp;%).</li>
+    <li><strong>La app ya no se recarga sola.</strong> Si la IA falla con la cámara abierta, cambia al modo ligero sin cerrar la cámara.</li>
+    <li><strong>Detecta cierres inesperados.</strong> Si Safari reinicia la página por falta de memoria, al volver la app lo avisa y activa el modo ligero.</li>
+    <li><strong>Voz:</strong> Safari solo deja hablar si la voz se activa con un toque; ahora se activa al tocar «Abrir cámara». Revisa también que el volumen esté arriba.</li>
+    <li>Si algo falla, en <strong>Progreso → Acerca de</strong> aparece el «Último problema», útil para saber qué pasó.</li>
+  </ul>
+
+  <h3>Consejos de uso en el celular</h3>
+  <ul>
+    <li>Ábrela una vez con Wi-Fi antes de la presentación para que la IA quede descargada.</li>
+    <li>Buena luz y el objeto cerca, llenando el cuadro. Un fondo liso ayuda.</li>
+    <li>Si un celular va lento, en <strong>Progreso → Ajustes</strong> se puede activar o desactivar el modo rápido.</li>
+  </ul>
+</section>
+
+<!-- ───────────────────────── 8 ───────────────────────── -->
+<section id="cambiar">
+  <span class="num">Sección 8</span>
+  <h2>Cómo modificarla</h2>
+  <p class="entrada">Abre la carpeta del proyecto en Visual Studio Code (<em>Archivo → Abrir carpeta</em>).</p>
+
+  <h3>Agregar un residuo nuevo</h3>
+  <ol>
+    <li>Abre <code>app/js/residuos.js</code>, copia un bloque completo de un residuo parecido y pégalo en la misma sección.</li>
+    <li>Cámbiale los datos. Ejemplo:
+<pre><code>{
+  id: 'cd-dvd', nombre: 'CD y DVD', emoji: '💿', caneca: 'especial',
+  consejo: 'Son residuos electrónicos: llévalos a un punto de recolección.',
+  claves: ['cd', 'dvd', 'disco'],
+  ia: ['a compact disc', 'a pile of old CDs and DVDs'],
+},</code></pre>
+      El <code>id</code> no se puede repetir. Las frases de <code>ia</code> van en inglés, describen cómo se <em>ve</em> el objeto y empiezan con «a», «an» o en plural.</li>
+    <li>Con la app abierta desde el <code>.bat</code>, entra a <code>http://localhost:8765/herramientas/generar-vectores.html</code> y pulsa <strong>Generar vectores</strong>. La primera vez descarga unos 170&nbsp;MB y tarda varios minutos.</li>
+    <li>Recarga la app. El residuo ya aparece en el buscador y la cámara lo reconoce.</li>
+  </ol>
+
+  <h3>Otros cambios frecuentes</h3>
+  <table>
+    <tr><th>Quiero…</th><th>Archivo</th><th>Qué tocar</th></tr>
+    <tr><td>Cambiar la caneca o el consejo de un residuo</td><td><code>app/js/residuos.js</code></td><td>Los campos <code>caneca</code> y <code>consejo</code>. No hace falta regenerar vectores.</td></tr>
+    <tr><td>Que sea más o menos exigente para afirmar</td><td><code>app/js/config.js</code></td><td><code>umbralSeguro</code> y <code>umbralDudoso</code>.</td></tr>
+    <tr><td>Cambiar colores o tamaños</td><td><code>app/css/estilos.css</code></td><td>Las variables del inicio (<code>--marca</code>, <code>--fondo</code>…).</td></tr>
+    <tr><td>Cambiar textos de las pantallas</td><td><code>app/js/app.js</code></td><td>Busca el texto con <code>Ctrl + F</code> y edítalo.</td></tr>
+    <tr><td>Cambiar el logo</td><td><code>herramientas/generar-iconos.html</code></td><td>Edita el dibujo y vuelve a generar los iconos.</td></tr>
+    <tr><td>Volver a medir la precisión</td><td><code>herramientas/evaluacion.html</code></td><td>Ábrela desde <code>localhost:8765</code> y pulsa <strong>Iniciar evaluación</strong>.</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 9 ───────────────────────── -->
+<section id="presentar">
+  <span class="num">Sección 9</span>
+  <h2>Cómo presentarla</h2>
+  <p class="entrada">Un guion de cinco minutos y las preguntas que probablemente te hagan.</p>
+
+  <h3>Antes de la presentación</h3>
+  <ul>
+    <li>Lleva residuos <strong>limpios</strong> de cada color: una botella plástica y una lata (blanca), una servilleta arrugada y un paquete de mecato (negra), una cáscara de banano (verde), una pila y una caja de pastillas (punto de recolección).</li>
+    <li>El día anterior, <strong>escanea cada objeto</strong>. Si alguno falla, toca «No es eso» y enséñale el correcto dos o tres veces desde distintos ángulos: quedará aprendido en ese dispositivo.</li>
+    <li>Abre la app con internet una vez para que la IA quede descargada.</li>
+    <li>Plan B: ten fotos de esos objetos en el celular para usar «Subir una foto».</li>
+  </ul>
+
+  <h3>Guion sugerido</h3>
+  <ol>
+    <li><strong>El problema (30 s).</strong> «Desde 2021 Colombia tiene un solo código de colores, pero frente a la caneca la duda sigue: ¿esto dónde va?».</li>
+    <li><strong>La demostración (2 min).</strong> Abre la cámara y muestra tres objetos de canecas distintas. Deja que se oiga la voz. Termina con la pila: «no va en ninguna caneca».</li>
+    <li><strong>Cuando no está segura (30 s).</strong> Muestra algo raro para que pregunte, corrígela con «No es eso» y vuelve a mostrarlo: ahora acierta.</li>
+    <li><strong>Lo demás (1 min).</strong> El buscador, la guía de canecas y una pregunta del reto.</li>
+    <li><strong>Cómo funciona (1 min).</strong> El diagrama de la <a href="#funciona">sección 4</a>: imagen → vector → comparación con frases → caneca. Recalca que no envía fotos a internet y que no cuesta nada.</li>
+  </ol>
+
+  <h3>Preguntas probables y cómo responderlas</h3>
+  <table>
+    <tr><th>Pregunta</th><th>Respuesta corta</th></tr>
+    <tr><td>¿Qué inteligencia artificial usa?</td><td>MobileCLIP-S0, un modelo de visión-lenguaje publicado por investigadores de Apple en 2024, ejecutado en el navegador con Transformers.js.</td></tr>
+    <tr><td>¿Ustedes la entrenaron?</td><td>No. Se usa preentrenada con la técnica <em>zero-shot</em>: se le dan frases que describen cada residuo. Nuestro trabajo fue el catálogo, las frases, la lógica de decisión, la interfaz y las pruebas. Además, la app aprende de las correcciones del usuario.</td></tr>
+    <tr><td>¿Necesita internet?</td><td>Solo la primera vez, para descargar la IA. Después funciona sin conexión.</td></tr>
+    <tr><td>¿A dónde van las fotos?</td><td>A ningún lado: se procesan en el mismo celular.</td></tr>
+    <tr><td>¿Qué pasa si se equivoca?</td><td>Muestra su nivel de confianza, pregunta cuando duda y se puede corregir; la corrección queda aprendida.</td></tr>
+    <tr><td>¿De dónde sale la clasificación?</td><td>Del artículo 4 de la Resolución 2184 de 2019 del Ministerio de Ambiente, y de los programas posconsumo para los residuos peligrosos.</td></tr>
+    <tr><td>¿Cuánto cuesta mantenerla?</td><td>Nada: el alojamiento es gratuito y no hay servidor, porque la IA corre en el dispositivo de cada persona.</td></tr>
+    <tr><td>¿Se puede usar en otra ciudad o país?</td><td>Sí: basta cambiar en el catálogo la caneca que corresponde a cada residuo.</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 10 ───────────────────────── -->
+<section id="escrito">
+  <span class="num">Sección 10</span>
+  <h2>Texto para el documento</h2>
+  <p class="entrada">Borradores listos para copiar a la plantilla del trabajo. Lo resaltado en <span class="hueco">amarillo</span> hay que completarlo o confirmarlo.</p>
+
+  <div class="copiar">
+    <h4>Título</h4>
+    <p>EcoCaneca: aplicación web con inteligencia artificial para orientar la separación de residuos sólidos en la fuente según el código de colores de Colombia.</p>
+  </div>
+
+  <div class="copiar">
+    <h4>Planteamiento del problema</h4>
+    <p>En Colombia se producen 14,4 millones de toneladas de residuos sólidos al año y solo el 16,9&nbsp;% de los residuos sólidos ordinarios se aprovecha; únicamente el 21&nbsp;% de los municipios aprovecha sus residuos (Departamento Nacional de Planeación [DNP], 2025). Para facilitar la separación en la fuente, la Resolución 2184 de 2019 adoptó un código de colores único para todo el país —blanco para residuos aprovechables, negro para no aprovechables y verde para orgánicos aprovechables—, vigente desde el 1 de enero de 2021 (Ministerio de Ambiente y Desarrollo Sostenible, 2019).</p>
+    <p>Sin embargo, que exista la norma no garantiza que las personas sepan aplicarla en el momento de botar algo. La resolución da criterios generales, no una lista residuo por residuo, y frente a la caneca surgen dudas concretas: ¿el icopor es reciclable?, ¿una servilleta va con el papel?, ¿dónde se bota una pila? Un residuo mal ubicado puede contaminar material que sí era aprovechable y reducir lo que finalmente se recicla.</p>
+    <p><span class="hueco">Sugerencia: respaldar este párrafo con una encuesta corta a compañeros o vecinos (ver las preguntas más abajo) y escribir aquí el resultado.</span></p>
+  </div>
+
+  <div class="copiar">
+    <h4>Pregunta de investigación</h4>
+    <p>¿Cómo puede una aplicación con inteligencia artificial, accesible desde cualquier celular, ayudar a las personas a identificar en qué caneca debe ir cada residuo según el código de colores vigente en Colombia?</p>
+  </div>
+
+  <div class="copiar">
+    <h4>Justificación</h4>
+    <p>La separación en la fuente es el primer paso de la cadena de aprovechamiento: si los residuos llegan mezclados, se pierde buena parte de su valor y se complica el trabajo de los recicladores de oficio. La mayoría de las personas ya lleva en el bolsillo un celular con cámara, de modo que una herramienta que responda la pregunta «¿esto dónde va?» en el momento exacto de la duda elimina la principal barrera: la falta de información oportuna.</p>
+    <p>EcoCaneca resuelve esa duda sin costo para el usuario ni para quien la administra: funciona desde el navegador, no requiere instalar nada desde una tienda de aplicaciones, no envía las fotografías a servidores externos y opera sin conexión después de la primera carga. Además de clasificar, enseña: incluye una guía del código de colores y un juego de preguntas, por lo que también sirve como material de educación ambiental.</p>
+  </div>
+
+  <div class="copiar">
+    <h4>Objetivo general</h4>
+    <p>Desarrollar una aplicación web con inteligencia artificial que identifique residuos sólidos mediante la cámara de un dispositivo e indique la caneca que les corresponde según el código de colores de la Resolución 2184 de 2019, como apoyo a la separación en la fuente.</p>
+    <h4 style="margin-top:14px">Objetivos específicos</h4>
+    <ol>
+      <li>Construir un catálogo de residuos domésticos frecuentes, clasificados según el código de colores nacional y los programas posconsumo.</li>
+      <li>Implementar un clasificador de imágenes que funcione dentro del navegador del dispositivo, sin enviar las fotografías a servidores externos.</li>
+      <li>Diseñar una interfaz accesible, visual y por voz, que comunique la caneca correcta y la forma adecuada de entregar cada residuo.</li>
+      <li>Evaluar la exactitud del clasificador con fotografías reales y documentar sus limitaciones.</li>
+    </ol>
+  </div>
+
+  <div class="copiar">
+    <h4>Alcance</h4>
+    <p>La versión 1.0 reconoce 66 tipos de residuos domésticos comunes, agrupados en las tres canecas del código de colores y en una cuarta categoría para residuos peligrosos y posconsumo. Funciona en navegadores modernos de celulares y computadores. No reemplaza las indicaciones de la empresa de aseo de cada municipio ni cubre residuos hospitalarios, industriales o de construcción.</p>
+  </div>
+
+  <div class="copiar">
+    <h4>Metodología</h4>
+    <p>Se siguió un desarrollo incremental por prototipos, en cinco fases: (1) revisión de la normativa y de las fuentes oficiales sobre el código de colores; (2) construcción del catálogo de residuos; (3) prototipo del clasificador con un modelo de visión-lenguaje preentrenado (MobileCLIP-S0) usado en modalidad <em>zero-shot</em>; (4) diseño e implementación de la interfaz como aplicación web progresiva; y (5) evaluación con fotografías reales, ajuste y documentación.</p>
+  </div>
+
+  <div class="copiar">
+    <h4>Requisitos funcionales</h4>
+    <ul>
+      <li><strong>RF-01.</strong> Escanear residuos con la cámara en tiempo real.</li>
+      <li><strong>RF-02.</strong> Analizar una fotografía cargada desde el dispositivo.</li>
+      <li><strong>RF-03.</strong> Indicar la caneca (blanca, negra o verde) o el punto de recolección, con el nombre del residuo y un consejo de entrega.</li>
+      <li><strong>RF-04.</strong> Mostrar el nivel de confianza y pedir confirmación cuando no haya certeza.</li>
+      <li><strong>RF-05.</strong> Leer el resultado en voz alta.</li>
+      <li><strong>RF-06.</strong> Permitir que el usuario corrija el resultado y aprender de esa corrección.</li>
+      <li><strong>RF-07.</strong> Buscar residuos por nombre.</li>
+      <li><strong>RF-08.</strong> Presentar una guía del código de colores.</li>
+      <li><strong>RF-09.</strong> Ofrecer un juego de preguntas sobre separación de residuos.</li>
+      <li><strong>RF-10.</strong> Registrar en el dispositivo el historial y las estadísticas de uso.</li>
+    </ul>
+    <h4 style="margin-top:14px">Requisitos no funcionales</h4>
+    <ul>
+      <li><strong>RNF-01. Privacidad.</strong> Las imágenes se procesan en el dispositivo y no se envían a ningún servidor.</li>
+      <li><strong>RNF-02. Disponibilidad.</strong> Funciona sin conexión a internet después de la primera carga.</li>
+      <li><strong>RNF-03. Compatibilidad.</strong> Opera en navegadores modernos de Android, iOS y computador, sin instalación desde tiendas.</li>
+      <li><strong>RNF-04. Rendimiento.</strong> En el equipo de desarrollo, cada análisis tarda menos de medio segundo.</li>
+      <li><strong>RNF-05. Costo.</strong> Costo de operación cero: alojamiento estático gratuito y sin servidor de aplicaciones.</li>
+      <li><strong>RNF-06. Accesibilidad.</strong> Respuesta por voz, botones grandes y colores con buen contraste.</li>
+      <li><strong>RNF-07. Mantenibilidad.</strong> El catálogo de residuos se edita en un solo archivo, sin procesos de compilación.</li>
+    </ul>
+  </div>
+
+  <div class="copiar">
+    <h4>Encuesta sugerida (para tener datos propios)</h4>
+    <ol>
+      <li>¿Conoce el código de colores para separar residuos (blanco, negro y verde)? Sí / No / Más o menos.</li>
+      <li>¿En su casa separan los residuos? Siempre / A veces / Nunca.</li>
+      <li>¿En qué caneca botaría una servilleta usada? Blanca / Negra / Verde / No sé.</li>
+      <li>¿En qué caneca botaría una pila? Blanca / Negra / Verde / En ninguna / No sé.</li>
+      <li>¿Usaría una aplicación que le diga dónde va cada residuo con solo apuntar la cámara? Sí / No / Tal vez.</li>
+    </ol>
+  </div>
+
+  <div class="copiar">
+    <h4>Datos del proyecto</h4>
+    <p>Integrantes: <span class="hueco">nombres</span> · Docente: <span class="hueco">nombre</span> · Asignatura: <span class="hueco">nombre de la materia</span> · Institución y programa: <span class="hueco">completar</span> · Fecha: <span class="hueco">completar</span></p>
+  </div>
+</section>
+
+<!-- ───────────────────────── 11 ───────────────────────── -->
+<section id="limites">
+  <span class="num">Sección 11</span>
+  <h2>Límites y siguientes pasos</h2>
+  <p class="entrada">Lo que conviene decir con honestidad y hacia dónde puede crecer.</p>
+
+  <h3>Límites actuales</h3>
+  <ul>
+    <li><strong>La IA se equivoca a veces</strong>, sobre todo con poca luz, objetos lejanos, fondos recargados o residuos que se parecen entre sí (un frasco de champú y uno de químicos, una lata y una pila vista de lado).</li>
+    <li><strong>No distingue limpio de sucio.</strong> Una botella plástica va a la blanca solo si está limpia; por eso el consejo de cada residuo lo recuerda.</li>
+    <li><strong>Reconoce 66 tipos de residuo.</strong> Lo que no está en el catálogo lo asimila al más parecido o pregunta.</li>
+    <li><strong>Todavía no se ha probado en un celular real.</strong> Se construyó y probó en computador; la prueba en celular queda para cuando se publique (<a href="#celular">sección 7</a>).</li>
+    <li><strong>Las reglas locales pueden variar.</strong> El catálogo sigue el código nacional; el municipio puede tener indicaciones propias.</li>
+    <li><strong>Licencia del modelo.</strong> Los pesos de MobileCLIP se publican con licencia para uso académico y de investigación (apple-amlr). Para este proyecto es adecuada; para un uso comercial habría que cambiar de modelo, lo que solo exige modificar <code>config.js</code> y regenerar los vectores.</li>
+  </ul>
+
+  <h3>Ideas para una segunda versión</h3>
+  <ul>
+    <li>Mapa de puntos de recolección posconsumo y rutas de reciclaje de El Espinal.</li>
+    <li>Ampliar el catálogo con residuos típicos de la región.</li>
+    <li>Códigos QR en las canecas del campus que abran la app.</li>
+    <li>Tabla de puntajes por curso para el reto.</li>
+    <li>Prueba con usuarios reales y medición de cuánto mejora la separación.</li>
+  </ul>
+</section>
+
+<!-- ───────────────────────── 12 ───────────────────────── -->
+<section id="fuentes">
+  <span class="num">Sección 12</span>
+  <h2>Fuentes</h2>
+  <p class="entrada">En formato APA 7, listas para la bibliografía. Consultadas el 10 de noviembre de 2026.</p>
+  <ul class="fuentes">
+    <li>Departamento Nacional de Planeación. (2025, 16 de enero). <em>El Gobierno del Cambio le cumple a los recicladores de oficio y sus organizaciones</em>. <a href="https://www.dnp.gov.co/Prensa_/Noticias/Paginas/el-gobierno-del-cambio-le-cumple-a-los-recicladores-de-oficio-y-sus-organizaciones.aspx" target="_blank" rel="noopener">https://www.dnp.gov.co/Prensa_/Noticias/Paginas/el-gobierno-del-cambio-le-cumple-a-los-recicladores-de-oficio-y-sus-organizaciones.aspx</a></li>
+    <li>Ministerio de Ambiente y Desarrollo Sostenible. (2019, 26 de diciembre). <em>Resolución 2184 de 2019, por la cual se modifica la Resolución 668 de 2016 sobre uso racional de bolsas plásticas y se adoptan otras disposiciones</em>. Diario Oficial 51.179. <a href="https://normas.cra.gov.co/Gestor/Docs/resolucion_minambienteds_2184_2019.htm" target="_blank" rel="noopener">https://normas.cra.gov.co/Gestor/Docs/resolucion_minambienteds_2184_2019.htm</a></li>
+    <li>Ministerio de Ambiente y Desarrollo Sostenible. (2020, 24 de diciembre). <em>Resolución 1344 de 2020, por la cual se adiciona un parágrafo al artículo 4 de la Resolución 2184 de 2019 y se dictan otras disposiciones</em>. Diario Oficial 51.541. <a href="https://normas.cra.gov.co/Gestor/Docs/resolucion_minambienteds_1344_2020.htm" target="_blank" rel="noopener">https://normas.cra.gov.co/Gestor/Docs/resolucion_minambienteds_1344_2020.htm</a></li>
+    <li>Ministerio de Ambiente y Desarrollo Sostenible. (2019, 27 de diciembre). <em>Gobierno unifica el código de colores para la separación de residuos en la fuente a nivel nacional</em>. <a href="https://www.minambiente.gov.co/gobierno-unifica-el-codigo-de-colores-para-la-separacion-de-residuos-en-la-fuente-a-nivel-nacional/" target="_blank" rel="noopener">https://www.minambiente.gov.co/gobierno-unifica-el-codigo-de-colores-para-la-separacion-de-residuos-en-la-fuente-a-nivel-nacional/</a></li>
+    <li>Ministerio de Ambiente y Desarrollo Sostenible. (2020, 30 de diciembre). <em>Colombia iniciará el 2021 con nuevo código de colores para la separación de residuos</em>. <a href="https://www.minambiente.gov.co/colombia-iniciara-el-2021-con-nuevo-codigo-de-colores-para-la-separacion-de-residuos/" target="_blank" rel="noopener">https://www.minambiente.gov.co/colombia-iniciara-el-2021-con-nuevo-codigo-de-colores-para-la-separacion-de-residuos/</a></li>
+    <li>Ministerio de Ambiente y Desarrollo Sostenible. (s.&nbsp;f.). <em>Programas posconsumo</em>. <a href="https://www.minambiente.gov.co/asuntos-ambientales-sectorial-y-urbana/programas-pos-consumos/" target="_blank" rel="noopener">https://www.minambiente.gov.co/asuntos-ambientales-sectorial-y-urbana/programas-pos-consumos/</a></li>
+    <li>Vasu, P. K. A., Pouransari, H., Faghri, F., Vemulapalli, R., y Tuzel, O. (2024). MobileCLIP: Fast image-text models through multi-modal reinforced training. En <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em>. <a href="https://huggingface.co/apple/MobileCLIP-S0" target="_blank" rel="noopener">https://huggingface.co/apple/MobileCLIP-S0</a></li>
+    <li>Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J., Krueger, G., y Sutskever, I. (2021). Learning transferable visual models from natural language supervision. En <em>Proceedings of the 38th International Conference on Machine Learning</em>.</li>
+    <li>Zhang, R., Zhang, W., Fang, R., Gao, P., Li, K., Dai, J., Qiao, Y., y Li, H. (2022). Tip-Adapter: Training-free adaption of CLIP for few-shot classification. En <em>European Conference on Computer Vision (ECCV)</em>.</li>
+    <li>Hugging Face. (2026). <em>Transformers.js</em> (versión 4.3.2) [Software]. <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">https://huggingface.co/docs/transformers.js</a></li>
+    <li>Wikimedia Commons. (s.&nbsp;f.). Fotografías de uso libre empleadas en la evaluación; el listado completo está en <code>herramientas/resultados-evaluacion.json</code>. <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">https://commons.wikimedia.org</a></li>
+  </ul>
+  <p class="pie">EcoCaneca 1.0 · Guía del proyecto. La inteligencia artificial puede equivocarse: ante la duda, consulta a la empresa de aseo de tu municipio.</p>
+</section>
+
+</main>
+</div>
+</body>
+</html>
