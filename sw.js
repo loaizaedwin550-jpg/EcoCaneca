@@ -8,7 +8,7 @@
 // Estrategia: para los archivos de la app se intenta primero la red (así siempre ves la última
 // versión) y, si no hay conexión, se usa la copia guardada.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE_APP = 'ecocaneca-app-' + VERSION;
 const CACHE_CDN = 'ecocaneca-cdn-' + VERSION;
 
@@ -60,7 +60,8 @@ self.addEventListener('activate', (evento) => {
 async function primeroRed(peticion) {
   const cache = await caches.open(CACHE_APP);
   try {
-    const respuesta = await fetch(peticion);
+    // 'no-cache' obliga a preguntarle al servidor si hay versión nueva (GitHub Pages guarda copias 10 min).
+    const respuesta = await fetch(peticion, { cache: 'no-cache' });
     if (respuesta.ok) cache.put(peticion, respuesta.clone());
     return respuesta;
   } catch (error) {
